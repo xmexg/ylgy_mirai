@@ -15,11 +15,22 @@ public class SendData {
 //    private static int FINISH_COST_TIME = 60;//完成游戏耗时,单位秒
 //    private static String FINISH_API = "https://cat-match.easygame2021.com/sheep/v1/game/game_over?rank_score=1&rank_state=%s&rank_time=%s&rank_role=1&skin=1";
 
-    public static String get(String token, String user_agent, int cost_time) throws IOException {//这个游戏用的get方法,令牌,浏览器,完成耗时
-        String finishAPI = "https://cat-match.easygame2021.com/sheep/v1/game/game_over?rank_score=1&rank_state="+"1"+"&rank_time="+cost_time+"&rank_role=1&skin=1";
+    public static String FinishGame_get(String token, String user_agent, int cost_time) throws IOException {//完成游戏
+        String url = "https://cat-match.easygame2021.com/sheep/v1/game/game_over?rank_score=1&rank_state="+"1"+"&rank_time="+cost_time+"&rank_role=1&skin=1";
+        return get(token, user_agent, url);
+    }
+
+    public static String GetUidInfo_get(String uid, String token, String user_agent) throws IOException {//获取指定用户的信息
+        String url = "https://cat-match.easygame2021.com/sheep/v1/game/user_rank_info?uid="+uid;
+        return get(token, user_agent, url);
+    }
+
+    public static String get(String token, String user_agent, String url) throws IOException {//这个游戏用的get方法,令牌,浏览器,完成耗时
         String Host = "cat-match.easygame2021.com";
+
+        URL obj = new URL(url);
+
         //发送get请求
-        URL obj = new URL(finishAPI);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
         //默认值我GET
@@ -31,8 +42,8 @@ public class SendData {
         con.setRequestProperty("t", token);
 
         int responseCode = con.getResponseCode();
-        Ylgy.INSTANCE.getLogger().info("\nSending 'GET' request to URL : " + finishAPI);
-        Ylgy.INSTANCE.getLogger().info("Response Code : " + responseCode);
+//        Ylgy.INSTANCE.getLogger().info("\nSending 'GET' request to URL : " + finishAPI);
+//        Ylgy.INSTANCE.getLogger().info("Response Code : " + responseCode);
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
@@ -44,7 +55,8 @@ public class SendData {
         in.close();
 
         //打印结果
-        Ylgy.INSTANCE.getLogger().info(response.toString());
+//        Ylgy.INSTANCE.getLogger().info(response.toString());
         return response.toString();
     }
+
 }

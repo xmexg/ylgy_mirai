@@ -1,10 +1,8 @@
 package org.sdn;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
+import java.util.Random;
 
 public class TokenFile {
     private static HashMap<String, String> tokenMap;
@@ -40,19 +38,56 @@ public class TokenFile {
         return tokenMap.get(key);
     }
 
-    public void add(String key, String value) {
+    public String getOne() {
+        //随机获取一个value
+        int size = tokenMap.size();//获取map的大小
+        return tokenMap.values().toArray(new String[size])[new Random().nextInt(size)];
+    }
+
+    public void set(String key, String value) {//不存在就添加,存在就修改并存文件
         //如果不存在则添加
         if (!tokenMap.containsKey(key)) {
             tokenMap.put(key, value);
-            //保存到文件
-            try {
-                java.io.FileWriter fw = new java.io.FileWriter(file_token, true);
-                fw.write(key + "=" + value);
-                fw.write(System.getProperty("line.separator"));//换行
-                fw.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            SaveToFile(key, value, true);
+        }else{
+            tokenMap.replace(key, value);
+            ClearFile();
+            SaveToFile(tokenMap, true);
         }
     }
+
+    private void SaveToFile(String key, String value, boolean append) {//存文件
+        try {
+            FileWriter fw = new FileWriter(file_token, append);
+            fw.write(key + "=" + value);
+            fw.write(System.getProperty("line.separator"));//换行
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void SaveToFile(HashMap hashmap, boolean append) {//存文件
+        try {
+            FileWriter fw = new FileWriter(file_token, append);
+            for (Object key : hashmap.keySet()) {
+                fw.write(key + "=" + hashmap.get(key));
+                fw.write(System.getProperty("line.separator"));//换行
+            }
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void ClearFile() {//清空文件
+        try {
+            FileWriter fw = new FileWriter(file_token, false);
+            fw.write("");
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
