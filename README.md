@@ -5,7 +5,7 @@
 插件下载后放到mirai的plugins文件夹下重启mirai机器人就好了
 
 # 效果展示
-![qq机器人](/ylgyImg/show1.jpg)
+![qq机器人](/ylgyImg/show1.png)
 ![游戏截屏](/ylgyImg/show2.jpg)
 
 # 如何获取pc微信token
