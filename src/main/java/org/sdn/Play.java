@@ -2,17 +2,13 @@ package org.sdn;
 
 import net.mamoe.mirai.console.command.CommandSenderOnMessage;
 import net.mamoe.mirai.console.command.java.JSimpleCommand;
-
 import java.io.IOException;
 import java.util.Random;
 
 public class Play extends JSimpleCommand {
     public static final Play INSTANCE = new Play();
-
-    public static String HEADER_TOKEN = "";// 用户token
+    private TokenFile tokenFile = new TokenFile();
     public static String HEADER_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.33";
-    public static int COST_TIME = 0;// 耗时,<=0为随机时间
-    public static int CYCLE_COUNT = 1;// 要通关次数
 
     private Play() {
         super(Ylgy.INSTANCE, "羊了个羊");
@@ -28,20 +24,29 @@ public class Play extends JSimpleCommand {
         return bfHelp.toString();
     }
 
-//    @Handler
-//    public void handle(CommandSenderOnMessage sender) {
-//        String qq = sender.getUser().getId() + "";
-//        TokenFile tokenFile = new TokenFile();
-//        if(tokenFile.get(qq) == null){
-//            sender.getSubject().sendMessage("没有找到你的微信token,请通过 羊了个羊 token=(你的token) 来自动羊了个羊\n\n"+help());
-//            return;
-//        }else{//应该看一看返回的结果,看一看error为0即为成功
-//            StartPlay(sender);
-//        }
-//    }
+    @Handler
+    public void handle(CommandSenderOnMessage sender) {
+        sender.getSubject().sendMessage("来到无参数");
+        String qq = sender.getUser().getId() + "";
+        String user_token = tokenFile.get(qq);
+        if(user_token == null){
+            sender.getSubject().sendMessage("没有找到你的微信token,请通过 羊了个羊 token=(你的token) 来自动羊了个羊\n\n"+help());
+            return;
+        }else{//应该看一看返回的结果,看一看error为0即为成功
+            StartPlay(sender, user_token, 0);
+        }
+    }
 
     @Handler
     public void handle(CommandSenderOnMessage sender, String ...arg){
+        String qq = sender.getUser().getId() + "";
+        String user_token = null;
+        int cost_time = 0;//耗时
+        int cycle_time = 1;//通关次数
+        if(tokenFile.get(qq) != null){
+            user_token = tokenFile.get(qq);
+        }
+
         //初始化参数
         for(String info:arg){
             if (info.equals("help")){
@@ -55,13 +60,15 @@ public class Play extends JSimpleCommand {
             }
             switch (list[0]){
                 case "token":
-                    HEADER_TOKEN = list[1];
+                    user_token = list[1];
+                    if(tokenFile.get(qq) == null)
+                        tokenFile.add(qq,user_token);
                     break;
                 case "costtime":
-                    COST_TIME = Integer.parseInt(list[1]);
+                    cost_time = Integer.parseInt(list[1]);
                     break;
                 case "cycle":
-                    CYCLE_COUNT = Integer.parseInt(list[1]);
+                    cycle_time = Integer.parseInt(list[1]);
                     break;
                 default:
                     sender.getSubject().sendMessage("参数: "+info+" 无法解析");
@@ -70,21 +77,21 @@ public class Play extends JSimpleCommand {
         }
 
         //开始执行
-        sender.getSubject().sendMessage("开始执行羊了个羊秒完成");
-        for(int i = CYCLE_COUNT>40?1:CYCLE_COUNT; i <= CYCLE_COUNT; i++){
-            StartPlay(sender);
+        sender.getSubject().sendMessage("开始执行羊了个羊秒完成,请稍等...");
+        for(int i = cycle_time>40?1:cycle_time; i <= cycle_time; i++){
+            StartPlay(sender, user_token, cost_time);
         }
     }
 
-    private String StartPlay(CommandSenderOnMessage sender){
+    private String StartPlay(CommandSenderOnMessage sender, String user_token, int cost_time){
         String result = null;
-        if(COST_TIME <= 0)
-            COST_TIME = new Random().nextInt(600)+1;
+        if(cost_time <= 0)
+            cost_time = new Random().nextInt(600)+1;
         try {
-            result = SendData.get(HEADER_TOKEN, HEADER_USER_AGENT, COST_TIME);
+            result = SendData.get(user_token, HEADER_USER_AGENT, cost_time);
             String errorCode = result.substring(result.indexOf("err_code")+10,result.indexOf("err_code")+11);
             if(errorCode.equals("0")){
-                sender.getSubject().sendMessage("羊了个羊成功");
+                sender.getSubject().sendMessage("羊了个羊成功,闯关时长: "+cost_time+" 秒");
             }else{
                 sender.getSubject().sendMessage("羊了个羊秒完成失败:"+result);
             }
@@ -95,4 +102,3 @@ public class Play extends JSimpleCommand {
         return result;
     }
 }
-
