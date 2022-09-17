@@ -18,6 +18,7 @@ https://www.bilibili.com/video/BV1kG4y1q7Dy
 
 # 效果展示
 ![qq机器人](/ylgyImg/show1.png)
+![qq机器人2](/ylgyImg/show3.jpg)
 ![游戏截屏](/ylgyImg/show2.jpg)
 
 # 如何获取pc微信token
