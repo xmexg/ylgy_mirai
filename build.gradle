@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'org.sdn'
-version = '0.2.0'
+version = '0.2.1'
 
 repositories {
     maven { url 'https://maven.aliyun.com/repository/public' }

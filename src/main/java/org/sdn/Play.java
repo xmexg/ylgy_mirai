@@ -19,9 +19,9 @@ public class Play extends JSimpleCommand {
 
     String help(){
         StringBuffer bfHelp = new StringBuffer();
-        bfHelp.append("这是一个根据 a-sheep-assistant 改编的 mirai 插件版羊了个羊秒完成插件\n\n");
+        bfHelp.append("这是一个根据 a-sheep-assistant 改编的羊了个羊秒完成 mirai 插件\n\n");
         bfHelp.append("羊了个羊命令帮助:\n");
-        bfHelp.append("说明:\nhelp 查看帮助\ntoken=eyXXXXXXXXX 设置token\ncosttime=60 设置耗时\ncycle=1 设置通关次数(最大40次)\nuid=12345678 查询uid信息\n");
+        bfHelp.append("说明:\nhelp 查看帮助\ntoken=eyXXXXXXXXX 设置token(仅私聊时有效)\ncosttime=60 设置耗时\ncycle=1 设置通关次数(最大5次,超过5次会被设置成1次)\nuid=12345678 查询uid信息\n");
         bfHelp.append("示例:\n羊了个羊\n羊了个羊 token=eyXXXXXXXXX\n羊了个羊 token=eyXXXXXXXXX costtime=60 cycle=1\n羊了个羊 uid=12345678");
         return bfHelp.toString();
     }
@@ -33,6 +33,15 @@ public class Play extends JSimpleCommand {
         int cost_time = 0;//耗时
         int cycle_time = 1;//通关次数
         String uid = null;//查询指定用户时才需要的uid
+
+        //查看现在是不是在qq群里
+//        boolean isGroup = sender.getSubject().getId() != sender.getUser().getId();
+        boolean isGroup = true;//默认为在群聊中
+        String textWithGroupId = sender.getPermitteeId().toString();//群信息,如果在群里获取到的是群号.发送者qq号
+        if(textWithGroupId.indexOf(".") == -1){//这才是不在群里
+                isGroup = false;
+        }
+
 
         //初始化参数
         for(String info:arg){
@@ -50,6 +59,10 @@ public class Play extends JSimpleCommand {
                     uid = list[1];
                     break;
                 case "token":
+                    if(isGroup){
+                        sender.getSubject().sendMessage("请撤回token并私聊机器人设置token");
+                        return;
+                    }
                     user_token = list[1];
                     if(tokenFile.get(qq) == null)
                         tokenFile.set(qq,user_token);
@@ -73,13 +86,17 @@ public class Play extends JSimpleCommand {
         }
 
         if (user_token==null || user_token.length()==0) {
-            sender.getSubject().sendMessage("没有找到你的token,无法羊了个羊打卡,请带上token参数");
+            sender.getSubject().sendMessage("没有找到你的token,无法羊了个羊打卡,请私聊机器人带上token参数");
             return;
         }
 
         //开始执行
-        sender.getSubject().sendMessage("开始执行羊了个羊秒完成,请稍等...");
-        for(int i = cycle_time>40?1:cycle_time; i <= cycle_time; i++){
+        cycle_time = cycle_time > 5 || cycle_time < 1? 1 : cycle_time;
+        for(int i = 1; i <= cycle_time; i++){
+            if(cycle_time==1)
+                sender.getSubject().sendMessage("开始执行羊了个羊秒完成,请稍等...");
+            else
+                sender.getSubject().sendMessage("开始执行第 ( "+i+" / "+cycle_time+" ) 次羊了个羊秒完成,请稍等...");
             StartPlay(sender, user_token, cost_time);
         }
     }
