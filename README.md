@@ -3,7 +3,7 @@
 
 # 劝退
 + 推荐直接去看这位大佬吧: https://github.com/Lcry/a-sheep-assistant  
-+ 原神3.0前瞻重播视频:
++ 原神3.1「赤土之王与三朝圣者」前瞻重播视频:
 https://www.bilibili.com/video/BV1kG4y1q7Dy
 + 旅行者,记得去看一眼你的体力昂  
 ![米游社](/ylgyImg/ys.jpg)  
