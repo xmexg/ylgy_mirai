@@ -8,7 +8,7 @@ public final class Ylgy extends JavaPlugin {
     public static final Ylgy INSTANCE = new Ylgy();
 
     private Ylgy() {
-        super(new JvmPluginDescriptionBuilder("org.mex.ylgy", "0.2.1")
+        super(new JvmPluginDescriptionBuilder("org.mex.ylgy", "0.3.0")
                 .name("羊了个羊")
                 .info("秒过羊了个羊mirai插件")
                 .author("mex")
