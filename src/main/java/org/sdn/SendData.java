@@ -30,12 +30,13 @@ public class SendData {
         return get(token, user_agent, url);
     }
 
-    public static String GetTokenByOpenId(String open_id, String token, String user_agent) throws IOException {//获取指定地图的信息
-        String url = "https://cat-match.easygame2021.com/sheep/v1/user/login_tourist";
-        return post(open_id, token, user_agent, url);
+    public static String GetTokenByOpenId(String uid, String open_id, String token, String user_agent) throws IOException {//获取指定地图的信息
+//        String url = "https://cat-match.easygame2021.com/sheep/v1/user/login_tourist";
+        String url = "https://cat-match.easygame2021.com/sheep/v1/user/login_oppo";
+        return post(uid, open_id, token, user_agent, url);
     }
 
-    public static String get(String token, String user_agent, String url) throws IOException {//这个游戏用的get方法,令牌,浏览器,完成耗时
+    private static String get(String token, String user_agent, String url) throws IOException {//这个游戏用的get方法,令牌,浏览器,完成耗时
         String Host = "cat-match.easygame2021.com";
 
         URL obj = new URL(url);
@@ -69,10 +70,11 @@ public class SendData {
         return response.toString();
     }
 
-    private static String post(String openid, String token, String user_agent, String url) throws IOException {//这个游戏用的get方法,令牌,浏览器,完成耗时
+    private static String post(String uid, String openid, String token, String user_agent, String url) throws IOException {//这个游戏用的get方法,令牌,浏览器,完成耗时
 //        String Host = "cat-match.easygame2021.com";
-        String body = "{\"uuid\":\""+openid+"\"}";
-
+//        String body = "{\"uuid\":\""+openid+"\"}";
+        String touxiang = Play.getUidInfo(uid, token)[3];
+        String body = "avatar="+touxiang+"&nick_name="+(touxiang.length()-8)+"&sex=1&uid="+openid;
         URL obj = new URL(url);
 
         //发送get请求
@@ -86,13 +88,13 @@ public class SendData {
         con.setDoInput(true);
 
         //添加请求头
-//        con.setRequestProperty("Host", Host);
-        con.setRequestProperty("Accept", "/");
-        con.setRequestProperty("Accept-Encoding", "gzip,compress,br,deflate");
+        con.setRequestProperty("Host", "cat-match.easygame2021.com");
+        con.setRequestProperty("Accept", "*/*");
+        con.setRequestProperty("Accept-Encoding", "gzip, deflate");
         con.setRequestProperty("Connection", "keep-alive");
         con.setRequestProperty("User-Agent", user_agent);
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Referer", "https://servicewechat.com/wx141bfb9b73c970a9/16/page-frame.html");
+        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        con.setRequestProperty("Referer", "https://wq.wxredcover.cn/");
         con.setRequestProperty("Content-Length", body.length()+"");
         con.setRequestProperty("t", token);
         //添加请求体
@@ -111,7 +113,7 @@ public class SendData {
         in.close();
 
         //打印结果
-        Ylgy.INSTANCE.getLogger().info("post结果:"+response.toString());
+//        Ylgy.INSTANCE.getLogger().info("post结果:"+response.toString());
         return response.toString();
     }
 }

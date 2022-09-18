@@ -3,6 +3,7 @@ package org.sdn;
 import net.mamoe.mirai.console.command.CommandSenderOnMessage;
 import net.mamoe.mirai.console.command.java.JSimpleCommand;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
@@ -135,65 +136,102 @@ public class Play extends JSimpleCommand {
         return result;
     }
 
-    private void sendUidInfo(CommandSenderOnMessage sender, String uid, String token) {
+    public static String[] getUidInfo(String uid, String token) {//这里绝对不能引入其他方法,也不能使用post
         String result = null;
-        StringBuffer info = new StringBuffer();
-        token = checkAndGetToken(sender, token);
+        String uidinfo[] = new String[26];
+//        StringBuffer info = new StringBuffer();
         if(token == null)
-            return;
+            return new String[]{"0","机器人中没有token,请私聊机器人设置token"};
         try {
             result = SendData.GetUidInfo_get(uid, token, HEADER_USER_AGENT);
-            if(result == null){
-                sender.getSubject().sendMessage("查询失败,请稍后重试");
-                return;
+            if (result == null) {
+                return new String[]{"0","羊了个羊没有返回数据"};
             }
-            if(!result.substring(result.indexOf("err_code")+10,result.indexOf(",")).equals("0")){
-                sender.getSubject().sendMessage(result);
-                return;
+            if (!result.substring(result.indexOf("err_code") + 10, result.indexOf(",")).equals("0")) {
+                return new String[]{"0","羊了个羊返回错误信息:"+result};
             }
-            info.append(uid+" 的信息为:\n");
-            info.append("昵称:"+result.substring(result.indexOf("nick_name")+12,result.indexOf("avatar")-3)+"\n");
-            info.append("头像:"+result.substring(result.indexOf("avatar")+9,result.indexOf("region")-3)+"\n");
-            info.append("省份:"+result.substring(result.indexOf("region")+9,result.indexOf("city")-3)+"\n");
-            info.append("城市:"+result.substring(result.indexOf("city")+7,result.indexOf("uid")-3)+"\n");
-            info.append("state:"+result.substring(result.indexOf("state")+7,result.indexOf("time")-2)+"\n");
-            info.append("上次完成耗时:"+result.substring(result.indexOf("time")+6,result.indexOf("role")-2)+"秒\n");
-            info.append("role:"+result.substring(result.indexOf("role")+6,result.indexOf("gender")-2)+"\n");
-            info.append("gender:"+result.substring(result.indexOf("gender")+8,result.indexOf("first")-2)+"\n");
-            info.append("first:"+result.substring(result.indexOf("first")+7,result.indexOf("ts")-2)+"\n");
+//            info.append(uid + " 的信息为:\n");
+//            info.append("昵称:" + result.substring(result.indexOf("nick_name") + 12, result.indexOf("avatar") - 3) + "\n");
+//            info.append("头像:" + result.substring(result.indexOf("avatar") + 9, result.indexOf("region") - 3) + "\n");
+//            info.append("省份:" + result.substring(result.indexOf("region") + 9, result.indexOf("city") - 3) + "\n");
+//            info.append("城市:" + result.substring(result.indexOf("city") + 7, result.indexOf("uid") - 3) + "\n");
+//            info.append("state:" + result.substring(result.indexOf("state") + 7, result.indexOf("time") - 2) + "\n");
+//            info.append("上次完成耗时:" + result.substring(result.indexOf("time") + 6, result.indexOf("role") - 2) + "秒\n");
+//            info.append("role:" + result.substring(result.indexOf("role") + 6, result.indexOf("gender") - 2) + "\n");
+//            info.append("gender:" + result.substring(result.indexOf("gender") + 8, result.indexOf("first") - 2) + "\n");
+//            info.append("first:" + result.substring(result.indexOf("first") + 7, result.indexOf("ts") - 2) + "\n");
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            Long time = Long.valueOf(result.substring(result.indexOf("ts") + 4, result.indexOf("fail") - 2));
+//            Date date = new Date(time * 1000L);
+//            info.append("上次完成挑战时间:" + sdf.format(date) + "\n");
+//            info.append("fail:" + result.substring(result.indexOf("fail") + 6, result.indexOf("skin") - 2) + "\n");
+//            info.append("skin:" + result.substring(result.indexOf("skin") + 6, result.indexOf("}")));
+            uidinfo[0] = "昵称";
+            uidinfo[1] = result.substring(result.indexOf("nick_name") + 12, result.indexOf("avatar") - 3);
+            uidinfo[2] = "头像";
+            uidinfo[3] = result.substring(result.indexOf("avatar") + 9, result.indexOf("region") - 3);
+            uidinfo[4] = "省份";
+            uidinfo[5] = result.substring(result.indexOf("region") + 9, result.indexOf("city") - 3);
+            uidinfo[6] = "城市";
+            uidinfo[7] = result.substring(result.indexOf("city") + 7, result.indexOf("uid") - 3);
+            uidinfo[8] = "state";
+            uidinfo[9] = result.substring(result.indexOf("state") + 7, result.indexOf("time") - 2);
+            uidinfo[10] = "上次完成耗时";
+            uidinfo[11] = result.substring(result.indexOf("time") + 6, result.indexOf("role") - 2);
+            uidinfo[12] = "role";
+            uidinfo[13] = result.substring(result.indexOf("role") + 6, result.indexOf("gender") - 2);
+            uidinfo[14] = "gender:";
+            uidinfo[15] = result.substring(result.indexOf("gender") + 8, result.indexOf("first") - 2);
+            uidinfo[16] = "first";
+            uidinfo[17] = result.substring(result.indexOf("first") + 7, result.indexOf("ts") - 2);
+            uidinfo[18] = "上次完成挑战时间";
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Long time = Long.valueOf(result.substring(result.indexOf("ts")+4,result.indexOf("fail")-2));
-            Date date = new Date(time*1000L);
-            info.append("上次完成挑战时间:"+sdf.format(date)+"\n");
-            info.append("fail:"+result.substring(result.indexOf("fail")+6,result.indexOf("skin")-2)+"\n");
-            info.append("skin:"+result.substring(result.indexOf("skin")+6,result.indexOf("}")));
-//            sender.getSubject().sendMessage(result);
-            sender.getSubject().sendMessage(info.toString());
+            Long time = Long.valueOf(result.substring(result.indexOf("ts") + 4, result.indexOf("fail") - 2));
+            Date date = new Date(time * 1000L);
+            uidinfo[19] = sdf.format(date);
+            uidinfo[20] = "fail";
+            uidinfo[21] = result.substring(result.indexOf("fail") + 6, result.indexOf("skin") - 2);
+            uidinfo[22] = "skin";
+            uidinfo[23] = result.substring(result.indexOf("skin") + 6, result.indexOf("}"));
+            uidinfo[24] = "uid";
+            uidinfo[25] = uid;
+            return uidinfo;
         }catch (IOException e){
-            sender.getSubject().sendMessage("在获取 "+uid+" 信息时发生了一点错误:\n"+ e);
+            return new String[]{"0","发生了一点错误:\n"+e.toString()};
         }
     }
 
-    private String checkAndGetToken(CommandSenderOnMessage sender, String token) {//用户没有自己的token就随机获取一个,有的话就用用户的
+    private void sendUidInfo(CommandSenderOnMessage sender, String uid, String token) {
+        StringBuffer info = new StringBuffer(uid+" 的信息为:\n");
+        token = checkAndGetToken(token);
+        String[] uidinfo = getUidInfo(uid, token);
+        if (uidinfo[0].equals("0")){
+            sender.sendMessage(uidinfo[1]);
+            return;
+        }
+        for (int i = 0; i < uidinfo.length; i++) {
+            info.append(uidinfo[i] + ":" + uidinfo[i + 1] + "\n");
+            i++;
+        }
+        sender.sendMessage(info.toString());
+    }
+
+    private String checkAndGetToken( String token) {//用户没有自己的token就随机获取一个,有的话就用用户的
         if(token == null || token.length()==0) {
             //随机获取一个token
             token = tokenFile.getOne();
-            if(token == null || token.length()==0) {
-                sender.getSubject().sendMessage("你还没有设置token,且服务器中没有找到任何token,无法查询用户信息");
-                return token;
+            if(token == null || token.length()==0) {//用户没写token,并且服务器中也没有token
+                return null;
             }
-//            sender.getSubject().sendMessage("你还没有设置token,已随机获取一个token");
-        } else {
-            return token;
         }
         return token;
     }
 
-    private String sendTokenByUid(CommandSenderOnMessage sender, String uid, String y_token, int cost_time, int cycle_time) {//传过来的token暂时假装不存在
+    private String sendTokenByUid(CommandSenderOnMessage sender, String uid, String y_token, int cost_time, int cycle_time) {
         String result = null;
         String user_tokenResult, user_token = null;
         String OpenIdResult, OpenId;
-        String token = checkAndGetToken(sender, null);//用户使用uid,一定不会带token
+        String token = checkAndGetToken(y_token);//用户没有自己的token就随机获取一个,有的话就用用户的
         if (token == null)
             return null;
         try {
@@ -207,7 +245,7 @@ public class Play extends JSimpleCommand {
                 sender.getSubject().sendMessage("正在根据"+uid+"的openid获取token");
                 OpenId = OpenIdResult.substring(OpenIdResult.indexOf("wx_open_id")+13,OpenIdResult.indexOf("wx_union_id")-3);
 //                sender.getSubject().sendMessage("获取到的Openid:"+OpenId);
-                user_tokenResult = SendData.GetTokenByOpenId(OpenId, token, HEADER_USER_AGENT);
+                user_tokenResult = SendData.GetTokenByOpenId(uid, OpenId, token, HEADER_USER_AGENT);
 //                sender.getSubject().sendMessage("获取到的user_token:"+user_tokenResult);
                 if(user_tokenResult == null){
                     sender.getSubject().sendMessage("获取"+uid+"的token失败,请稍后重试");
