@@ -12,6 +12,7 @@ https://www.bilibili.com/video/BV1kG4y1q7Dy
 # 提示
 + 群聊中使用token参数不生效,也不建议在群聊中使用token,初次运行请私聊机器人发送 `/羊了个羊 token=(你的token)` 以后就不需要token参数了,直接发送 `/羊了个羊` 即可
 + 每次最大挑战次数从 40 改成了 5 次,如果 `/羊了个羊 cycle=10` 则只会挑战1次
++ v0.3.0开始可以直接使用uid来羊了个羊了，参考 https://github.com/lyzcren/sheep_win  
 
 # 如何使用
 插件下载后放到mirai的plugins文件夹下重启mirai机器人就好了
