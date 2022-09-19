@@ -167,7 +167,10 @@ public class Play extends JSimpleCommand {
         uidinfo[0] = "昵称";
         uidinfo[1] = result.substring(result.indexOf("nick_name") + 12, result.indexOf("avatar") - 3);
         uidinfo[2] = "头像";
-        uidinfo[3] = result.substring(result.indexOf("avatar") + 9, result.indexOf("region") - 3);
+        if(result.indexOf("language") != -1)
+            uidinfo[3] = result.substring(result.indexOf("avatar") + 9, result.indexOf("language") - 5);
+        else
+            uidinfo[3] = result.substring(result.indexOf("avatar") + 9, result.indexOf("region") - 3);
         uidinfo[4] = "省份";
         uidinfo[5] = result.substring(result.indexOf("region") + 9, result.indexOf("city") - 3);
         uidinfo[6] = "城市";
@@ -207,6 +210,12 @@ public class Play extends JSimpleCommand {
         }catch (IOException e){
             return new String[]{"0","发生了一点错误:\n"+e.toString()};
         }
+        if (result.length()==0) {
+            return new String[]{"0","羊了个羊没有返回数据"};
+        }
+        if (!result.substring(result.indexOf("err_code") + 10, result.indexOf(",")).equals("0")) {
+            return new String[]{"0","羊了个羊返回错误信息:"+result};
+        }
         uidinfo[0] = "created_at";
         uidinfo[1] = result.substring(result.indexOf("created_at") + 13, result.indexOf("updated_at") - 3);
         uidinfo[2] = "updated_at";
@@ -214,7 +223,10 @@ public class Play extends JSimpleCommand {
         uidinfo[4] = "role";
         uidinfo[5] = result.substring(result.indexOf("role") + 6, result.indexOf("uid")-2);
         uidinfo[6] = "头像";
-        uidinfo[7] = result.substring(result.indexOf("avatar") + 9, result.indexOf("language") - 3);
+        if(result.indexOf("language") != -1)
+            uidinfo[7] = result.substring(result.indexOf("avatar") + 9, result.indexOf("language") - 3);
+        else
+            uidinfo[7] = result.substring(result.indexOf("avatar") + 9, result.indexOf("wx_open_id") - 3);
         uidinfo[8] = "last_login_time";
         uidinfo[9] = result.substring(result.indexOf("last_login_time") + 17, result.indexOf("last_logout_time") - 2);
         uidinfo[10] = "last_logout_time";
