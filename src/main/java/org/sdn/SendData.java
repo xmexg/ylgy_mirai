@@ -20,8 +20,13 @@ public class SendData {
         return get(token, user_agent, url);
     }
 
-    public static String GetUidInfo_get(String uid, String token, String user_agent) throws IOException {//获取指定用户的信息
+    public static String GetUidInfo_get(String uid, String token, String user_agent) throws IOException {//获取指定用户的信息,这一个信息每天重置一次
         String url = "https://cat-match.easygame2021.com/sheep/v1/game/user_rank_info?uid="+uid;
+        return get(token, user_agent, url);
+    }
+
+    public static String GetUidInfo2_get(String uid, String token, String user_agent) throws IOException {//获取指定用户的信息,这一个头像不会每天重置
+        String url = "https://cat-match.easygame2021.com/sheep/v1/game/user_info?uid="+uid+"&t="+token;
         return get(token, user_agent, url);
     }
 
@@ -30,10 +35,10 @@ public class SendData {
         return get(token, user_agent, url);
     }
 
-    public static String GetTokenByOpenId(String uid, String open_id, String token, String user_agent) throws IOException {//获取指定地图的信息
+    public static String GetTokenByOpenId(String uid, String open_id, String token, String user_agent, String head) throws IOException {//获取指定地图的信息
 //        String url = "https://cat-match.easygame2021.com/sheep/v1/user/login_tourist";
         String url = "https://cat-match.easygame2021.com/sheep/v1/user/login_oppo";
-        return post(uid, open_id, token, user_agent, url);
+        return post(uid, open_id, token, user_agent, url, head);
     }
 
     private static String get(String token, String user_agent, String url) throws IOException {//这个游戏用的get方法,令牌,浏览器,完成耗时
@@ -70,10 +75,10 @@ public class SendData {
         return response.toString();
     }
 
-    private static String post(String uid, String openid, String token, String user_agent, String url) throws IOException {//这个游戏用的get方法,令牌,浏览器,完成耗时
+    private static String post(String uid, String openid, String token, String user_agent, String url, String head) throws IOException {//这个游戏用的get方法,令牌,浏览器,完成耗时
 //        String Host = "cat-match.easygame2021.com";
 //        String body = "{\"uuid\":\""+openid+"\"}";
-        String touxiang = Play.getUidInfo(uid, token)[3];
+        String touxiang = head;
         String body = "avatar="+touxiang+"&nick_name="+(touxiang.length()-8)+"&sex=1&uid="+openid;
         URL obj = new URL(url);
 
