@@ -23,8 +23,8 @@ public class Play extends JSimpleCommand {
         StringBuffer bfHelp = new StringBuffer();
         bfHelp.append("这是一个根据 a-sheep-assistant 改编的羊了个羊秒完成 mirai 插件\n\n");
         bfHelp.append("羊了个羊命令帮助:\n");
-        bfHelp.append("说明:\nhelp 查看帮助\ntoken=eyXXXXXXXXX 设置token(仅私聊时有效)\ncosttime=60 设置耗时\ncycle=1 设置通关次数(最大"+MAXCYCLE+"次,超过"+MAXCYCLE+"次会被设置成1次)\nuid=12345678 通过uid来羊了个羊\nuidinfo=12345678 查询uid信息\nhead=http://xxx.jpg 配合uid设置头像(外部链接好像会清空头像)\n");
-        bfHelp.append("示例:\n羊了个羊\n羊了个羊 token=eyXXXXXXXXX\n羊了个羊 token=eyXXXXXXXXX costtime=60 cycle=1\n羊了个羊 uid=12345678\n羊了个羊 uidinfo=12345678\n羊了个羊 uid=12345678 head=http://xxx\n");
+        bfHelp.append("说明:\nhelp 查看帮助\n topic 加上topic表示完成羊了个羊话题,不加topic表示加入羊群\ntoken=eyXXXXXXXXX 设置token(仅私聊时有效)\ncosttime=60 设置耗时\ncycle=1 设置通关次数(最大"+MAXCYCLE+"次,超过"+MAXCYCLE+"次会被设置成1次)\nuid=12345678 通过uid来羊了个羊\nuidinfo=12345678 查询uid信息\nhead=http://xxx.jpg 配合uid设置头像(外部链接好像会清空头像)\n");
+        bfHelp.append("示例:\n羊了个羊\n羊了个羊 topic\n羊了个羊 token=eyXXXXXXXXX\n羊了个羊 token=eyXXXXXXXXX topic\n羊了个羊 token=eyXXXXXXXXX costtime=60 cycle=1\n羊了个羊 uid=12345678\n羊了个羊 topic uidinfo=12345678\n羊了个羊 uidinfo=12345678\n羊了个羊 uid=12345678 head=http://xxx\n");
         return bfHelp.toString();
     }
 
@@ -37,6 +37,7 @@ public class Play extends JSimpleCommand {
         String uidinfo = null;//查询指定用户时才需要的uid
         String uid = null;//羊了个羊时才需要的uid
         String head = null;//头像连接
+        String type = "game";//羊了个羊挑战类型,game表示加入羊群,topic表示挑战话题
 
         //查看现在是不是在qq群里
 //        boolean isGroup = sender.getSubject().getId() != sender.getUser().getId();
@@ -52,6 +53,10 @@ public class Play extends JSimpleCommand {
             if (info.equals("help")){
                 sender.getSubject().sendMessage(help());
                 return;
+            }
+            if(info.equals("topic")){
+                type = "topic";
+                continue;
             }
             String[] list = info.split("=",2);
             if(list.length != 2 || list[0] == null || list[1] == null || list[0].length()==0 || list[1].length()==0) {
@@ -98,7 +103,7 @@ public class Play extends JSimpleCommand {
 
         if(uid != null){
             sender.getSubject().sendMessage("开始羊了个羊uid:"+uid);
-            sendTokenByUid(sender, uid, user_token, cost_time, cycle_time, head);
+            sendTokenByUid(sender, uid, user_token, cost_time, cycle_time, head, type);
             return;
         }
 
@@ -107,10 +112,10 @@ public class Play extends JSimpleCommand {
             return;
         }
 
-        run(sender, user_token, cost_time, cycle_time);
+        run(sender, user_token, cost_time, cycle_time, type);
     }
 
-    private void run(CommandSenderOnMessage sender, String user_token, int cost_time, int cycle_time) {
+    private void run(CommandSenderOnMessage sender, String user_token, int cost_time, int cycle_time, String type) {
         //开始执行
         cycle_time = cycle_time > MAXCYCLE || cycle_time < 1? 1 : cycle_time;
         for(int i = 1; i <= cycle_time; i++){
@@ -121,7 +126,7 @@ public class Play extends JSimpleCommand {
             else {
                 sender.getSubject().sendMessage("开始第 ( " + i + " / " + cycle_time + " ) 次羊了个羊秒完成,设置耗时:"+set_cost_time+"秒");
             }
-            String result = StartPlay(sender, user_token, set_cost_time);
+            String result = StartPlay(sender, user_token, set_cost_time, type);
             if(!result.startsWith("success")){
                 sender.getSubject().sendMessage("羊了个羊秒完成失败,错误信息:\n"+result);
                 return;
@@ -129,12 +134,12 @@ public class Play extends JSimpleCommand {
         }
     }
 
-    private String StartPlay(CommandSenderOnMessage sender, String user_token, int cost_time){
+    private String StartPlay(CommandSenderOnMessage sender, String user_token, int cost_time, String type){
         String result;
         if(cost_time <= 0)
             cost_time = new Random().nextInt(600)+1;
         try {
-            result = SendData.FinishGame_get(user_token, HEADER_USER_AGENT, cost_time);
+            result = SendData.FinishGame_get(user_token, HEADER_USER_AGENT, cost_time, type);
             String errorCode = result.substring(result.indexOf("err_code")+10,result.indexOf("err_code")+11);
             if(errorCode.equals("0")){
                 return "success";
@@ -142,7 +147,7 @@ public class Play extends JSimpleCommand {
                 return "fail:"+result;
             }
         }catch (IOException e){
-            return "fail:"+e.toString();
+            return "fail:"+ e;
         }
     }
 
@@ -167,7 +172,7 @@ public class Play extends JSimpleCommand {
         uidinfo[0] = "昵称";
         uidinfo[1] = result.substring(result.indexOf("nick_name") + 12, result.indexOf("avatar") - 3);
         uidinfo[2] = "头像";
-        if(result.indexOf("language") != -1)
+        if(result.contains("language"))
             uidinfo[3] = result.substring(result.indexOf("avatar") + 9, result.indexOf("language") - 5);
         else
             uidinfo[3] = result.substring(result.indexOf("avatar") + 9, result.indexOf("region") - 3);
@@ -201,14 +206,14 @@ public class Play extends JSimpleCommand {
 
     public static String[] getUidInfo2(String uid, String token){
         String result;
-        String uidinfo[] = new String[20];
+        String[] uidinfo = new String[20];
         if (token == null){
             return new String[]{"0","机器人中没有token,请私聊机器人设置token"};
         }
         try {
             result = SendData.GetUidInfo2_get(uid, token, HEADER_USER_AGENT);
         }catch (IOException e){
-            return new String[]{"0","发生了一点错误:\n"+e.toString()};
+            return new String[]{"0","发生了一点错误:\n"+ e};
         }
         if (result.length()==0) {
             return new String[]{"0","羊了个羊没有返回数据"};
@@ -223,7 +228,7 @@ public class Play extends JSimpleCommand {
         uidinfo[4] = "role";
         uidinfo[5] = result.substring(result.indexOf("role") + 6, result.indexOf("uid")-2);
         uidinfo[6] = "头像";
-        if(result.indexOf("language") != -1)
+        if(result.contains("language"))
             uidinfo[7] = result.substring(result.indexOf("avatar") + 9, result.indexOf("language") - 3);
         else
             uidinfo[7] = result.substring(result.indexOf("avatar") + 9, result.indexOf("wx_open_id") - 3);
@@ -275,7 +280,7 @@ public class Play extends JSimpleCommand {
         return token;
     }
 
-    private void sendTokenByUid(CommandSenderOnMessage sender, String uid, String y_token, int cost_time, int cycle_time, String head) {
+    private void sendTokenByUid(CommandSenderOnMessage sender, String uid, String y_token, int cost_time, int cycle_time, String head, String type) {
         String user_tokenResult, user_token;
         String OpenIdResult, OpenId;
         String token = checkAndGetToken(y_token);//用户没有自己的token就随机获取一个,有的话就用用户的
@@ -305,10 +310,10 @@ public class Play extends JSimpleCommand {
                 if(user_tokenResult.substring(user_tokenResult.indexOf("err_code")+10,user_tokenResult.indexOf(",")).equals("0")) {
                     user_token = user_tokenResult.substring(user_tokenResult.indexOf("token") + 8, user_tokenResult.indexOf("\",\"uid"));
 //                    sender.getSubject().sendMessage("获取到的user_token:"+user_token);
-                    run(sender,user_token,cost_time,cycle_time);
+                    run(sender,user_token,cost_time,cycle_time,type);
 
                 }else{
-                    sender.getSubject().sendMessage("在获取 "+uid+" 的token时发生了一点错误:\n"+user_tokenResult);
+                    sender.getSubject().sendMessage("在获取 "+uid+" 的token时发生了一点错误:\n"+user_tokenResult + "\n\n添加head=http://xxx来设置头像或许也是一种解决方法");
                 }
             }else {
                 sender.getSubject().sendMessage("在获取 "+uid+" OpenId时发生错误:\n"+OpenIdResult);

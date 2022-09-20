@@ -24,6 +24,7 @@ public class TokenFile {
             BufferedReader br = new BufferedReader(new FileReader(file_token));
             String line;
             while ((line = br.readLine()) != null) {
+                if(line.length()==0 || line.indexOf("=") == -1) continue;
                 String[] split = line.split("=");
                 tokenMap.put(split[0], split[1]);
             }

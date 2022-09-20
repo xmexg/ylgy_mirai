@@ -15,8 +15,18 @@ public class SendData {
 //    private static int FINISH_COST_TIME = 60;//完成游戏耗时,单位秒
 //    private static String FINISH_API = "https://cat-match.easygame2021.com/sheep/v1/game/game_over?rank_score=1&rank_state=%s&rank_time=%s&rank_role=1&skin=1";
 
-    public static String FinishGame_get(String token, String user_agent, int cost_time) throws IOException {//完成游戏
-        String url = "https://cat-match.easygame2021.com/sheep/v1/game/game_over?rank_score=1&rank_state="+"1"+"&rank_time="+cost_time+"&rank_role=1&skin=1";
+    public static String FinishGame_get(String token, String user_agent, int cost_time, String type) throws IOException {//完成游戏,type = game,加入羊圈挑战;type = topic,加入话题挑战
+        String url;
+        switch (type) {
+            case "game":
+                url = "https://cat-match.easygame2021.com/sheep/v1/game/game_over?rank_score=1&rank_state="+"1"+"&rank_time="+cost_time+"&rank_role=1&skin=1";
+                break;
+            case "topic":
+                url = "https://cat-match.easygame2021.com/sheep/v1/game/topic_game_over?rank_score=1&rank_state=1&rank_time="+cost_time+"&rank_role=2&skin="+"1"+"&t="+token;
+                break;
+            default:
+                return null;
+        }
         return get(token, user_agent, url);
     }
 
