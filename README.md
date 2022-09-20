@@ -2,6 +2,7 @@
 羊了个羊mirai插件
 
 # 劝退
+### 羊了个羊接口改的真是太频繁了，几乎一天换一个接口，本人考试在即，暂停维护
 + 推荐直接去看这位大佬吧: https://github.com/Lcry/a-sheep-assistant  
 + 原神3.1「赤土之王与三朝圣者」前瞻重播视频:
 https://www.bilibili.com/video/BV1kG4y1q7Dy
